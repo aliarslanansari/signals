@@ -1,5 +1,13 @@
 # @preact/signals-react-transform
 
+## 0.1.1
+
+### Patch Changes
+
+- [#413](https://github.com/preactjs/signals/pull/413) [`ad6305c`](https://github.com/preactjs/signals/commit/ad6305c973160fb1272b6ad2e3783e6e3410f9de) Thanks [@XantreGodlike](https://github.com/XantreGodlike)! - Added 'module:' prefix to readme to babel recognized plugin correctly
+
+* [#421](https://github.com/preactjs/signals/pull/421) [`f80b251`](https://github.com/preactjs/signals/commit/f80b251d7333e1a1d82e537969a15ba17657c82f) Thanks [@andrewiggins](https://github.com/andrewiggins)! - Add an "all" mode to the react transform that transforms all components to be reactive to signals
+
 ## 0.1.0
 
 ### Minor Changes
