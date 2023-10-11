@@ -8,10 +8,14 @@ import {
 	GeneratedCode,
 	assignmentComp,
 	declarationComp,
+	declarationHooks,
 	exportDefaultComp,
+	exportDefaultHooks,
 	exportNamedComp,
+	exportNamedHooks,
 	objectPropertyComp,
 	variableComp,
+	variableHooks,
 } from "./helpers";
 
 const format = (code: string) => prettier.format(code, { parser: "babel" });
@@ -41,6 +45,8 @@ function runTest(
 	filename?: string
 ) {
 	const output = transformCode(input, options, filename);
+	console.log("\t", format(input).replace(/\s+/g, " "));
+	console.log("\t", format(output).replace(/\s+/g, " "));
 	expect(format(output)).to.equal(format(expected));
 }
 
@@ -53,6 +59,8 @@ interface TestCaseConfig {
 	comment?: CommentKind;
 	/** Options to pass to the babel plugin */
 	options: PluginOptions;
+	/** The filename to run the transform under */
+	filename?: string;
 }
 
 let testCount = 0;
@@ -94,17 +102,19 @@ function runTestCases(config: TestCaseConfig, testCases: GeneratedCode[]) {
 				expected = input;
 			}
 
-			const filename = config.useValidAutoMode
-				? "/path/to/Component.js"
-				: "C:\\path\\to\\lowercase.js";
-
-			runTest(input, expected, config.options, filename);
+			runTest(input, expected, config.options, config.filename);
 		});
 	}
 }
 
-function runGeneratedTestCases(config: TestCaseConfig) {
+function runGeneratedComponentTestCases(config: TestCaseConfig): void {
 	const codeConfig = { auto: config.useValidAutoMode, comment: config.comment };
+	config = {
+		...config,
+		filename: config.useValidAutoMode
+			? "/path/to/Component.js"
+			: "C:\\path\\to\\lowercase.js",
+	};
 
 	// e.g. function C() {}
 	describe("function components", () => {
@@ -151,6 +161,41 @@ function runGeneratedTestCases(config: TestCaseConfig) {
 	describe("named exported components", () => {
 		runTestCases(config, exportNamedComp(codeConfig));
 	});
+}
+
+function runGeneratedHookTestCases(config: TestCaseConfig): void {
+	const codeConfig = { auto: config.useValidAutoMode, comment: config.comment };
+	config = {
+		...config,
+		filename: config.useValidAutoMode
+			? "/path/to/useCustomHook.js"
+			: "C:\\path\\to\\usecustomHook.js",
+	};
+
+	// e.g. function useCustomHook() {}
+	describe.only("function hooks", () => {
+		runTestCases(config, declarationHooks(codeConfig));
+	});
+
+	// e.g. const useCustomHook = () => {}
+	describe.only("variable declared hooks", () => {
+		runTestCases(config, variableHooks(codeConfig));
+	});
+
+	// e.g. export default () => {}
+	describe.only("default exported hooks", () => {
+		runTestCases(config, exportDefaultHooks(codeConfig));
+	});
+
+	// e.g. export function useCustomHook() {}
+	describe.only("named exported hooks", () => {
+		runTestCases(config, exportNamedHooks(codeConfig));
+	});
+}
+
+function runGeneratedTestCases(config: TestCaseConfig): void {
+	runGeneratedComponentTestCases(config);
+	runGeneratedHookTestCases(config);
 }
 
 describe.only("React Signals Babel Transform", () => {
